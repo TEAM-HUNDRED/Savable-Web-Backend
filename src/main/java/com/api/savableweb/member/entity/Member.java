@@ -1,0 +1,39 @@
+package com.api.savableweb.member.entity;
+
+import com.api.savableweb.member.dto.MyRankingInfoDto;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import com.vladmihalcea.hibernate.type.json.JsonType;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.Type;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter @Setter
+@NoArgsConstructor
+public class Member {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String username;
+    private Long savedMoney;
+    private Long reward;
+    private String kakaoId;
+    private String kakaoName;
+
+    // 참여자 정보
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb", name = "participation")
+    private List<Participation> participationList = new ArrayList<Participation>();
+
+    // 인증 정보
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb", name= "certification")
+    private List<Certification> certificationList = new ArrayList<Certification>();
+
+}

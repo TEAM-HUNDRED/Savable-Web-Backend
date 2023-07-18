@@ -1,0 +1,24 @@
+spring:
+  ##JPA 설정정보
+  jpa:
+    hibernate:
+      show-sql: true
+      ddl-auto: update
+      format_sql: true
+    database: postgresql
+
+  ##POSTGRESQL 연결정보
+  datasource:
+    maximum-pool-size: 4
+    url: jdbc:postgresql://savable-test-database.cvgi6zzejqxg.ap-northeast-2.rds.amazonaws.com/savable_test_db
+    username: postgres
+    password: Redhund200
+    driver-class-name: org.postgresql.Driver
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type: trace
+#
+#sentry:
+#  dsn: https://33600a57976d42a798eedfa2a64c4b6b@o4505526964256768.ingest.sentry.io/4505526978674688
