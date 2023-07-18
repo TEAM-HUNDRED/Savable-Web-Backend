@@ -1,5 +1,6 @@
 package com.api.savableweb.member.repository;
 
+import com.api.savableweb.member.dto.MyChallengeInfoDto;
 import com.api.savableweb.member.dto.MyPrivateRankingInfoDto;
 import com.api.savableweb.member.dto.MyRankingInfoDto;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,7 @@ public class MemberJdbcRepository implements MemberRepository {
                 "order by \n" +
                 "r.ranking desc, r.saved_money\n" +
                 "limit 1;\n";
+        log.info("kakaoId={}",kakaoId);
         MyPrivateRankingInfoDto privateRankingInfoDto = template.queryForObject(sql, rankingPrivateRowMapper(), kakaoId);
         return privateRankingInfoDto;
     }
@@ -76,6 +78,28 @@ public class MemberJdbcRepository implements MemberRepository {
         return certRankingList;
     }
 
+    @Override
+    public List<MyChallengeInfoDto> findParticipateChallengeList(String kakaoId){
+        String sql="with chall as (\n" +
+                "SELECT\n" +
+                "  data_row ->>'challenge_id' as c_id,\n" +
+                "  m.kakao_id,\n" +
+                "  count(*) cnt,\n" +
+                "  m.username \n" +
+                "FROM \"member\" m ,\n" +
+                "     jsonb_array_elements(m.certification) AS data_row,\n" +
+                "     jsonb_array_elements(data_row->'cert') AS cert_data\n" +
+                "where cert_data->>'check' = 'PASS' and m.kakao_id =?\n" +
+                "group by m.kakao_id,c_id,m.username)\n" +
+                "select chall.kakao_id, c2.title,chall.username,\n" +
+                "c2.saved_money*chall.cnt as saved_money,\n" +
+                "c2.reward*chall.cnt as reward\n" +
+                "from chall join challenge c2 on chall.c_id::int = c2.id;";
+        List<MyChallengeInfoDto> myChallengeList = template.query(sql, challengeRowMapper(),kakaoId);
+        log.debug("myChallengeList={}", myChallengeList);
+;
+    return myChallengeList;
+    }
 
     private RowMapper<MyRankingInfoDto> rankingRowMapper() {
         return ((rs, rowNum) ->
@@ -95,6 +119,17 @@ public class MemberJdbcRepository implements MemberRepository {
                         .savedMoney(rs.getInt("savedmoney"))
                         .gap(rs.getInt("gap"))
                         .build()
+        );
+    }
+
+    private RowMapper<MyChallengeInfoDto> challengeRowMapper() {
+        return ((rs, rowNum) ->
+                MyChallengeInfoDto.builder()
+                    .title(rs.getString("title"))
+                    .savedMoney(rs.getInt("saved_money"))
+                    .reward((rs.getInt("reward")))
+                    .username(rs.getString("username"))
+                    .build()
         );
     }
 }

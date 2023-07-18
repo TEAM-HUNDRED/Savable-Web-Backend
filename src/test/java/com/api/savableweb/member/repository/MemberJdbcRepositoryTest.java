@@ -1,5 +1,6 @@
 package com.api.savableweb.member.repository;
 
+import com.api.savableweb.member.dto.MyChallengeInfoDto;
 import com.api.savableweb.member.dto.MyPrivateRankingInfoDto;
 import com.api.savableweb.member.dto.MyRankingInfoDto;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,13 @@ class MemberJdbcRepositoryTest {
 
     @Test
     public void getPrivateRankInfo() {
-        MyPrivateRankingInfoDto myDto = repository.findByKakaoId("c98b7711579e937282bf3a386f752ea6b0af0b940ee2e49a67787856b6fbed39e3");
+        MyPrivateRankingInfoDto myDto = repository.findByKakaoId("6b81bf25809b8705c80efe6d893b14efa2cd253daf6323f980b9b4c8e6d09a3eb9");
         log.info("test result = {}", myDto);
+    }
+
+    @Test
+    public void getChallengeInfo() {
+        List<MyChallengeInfoDto> myChallengeInfoDto = repository.findParticipateChallengeList("4d82be285a8b342f32bfcdf0af2d52d0f8a5ea726b128403e972865097f23c2c48");
+        log.info("test result = {}", myChallengeInfoDto);
     }
 }
