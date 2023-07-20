@@ -1,6 +1,7 @@
 package com.api.savableweb.member.repository;
 
 import com.api.savableweb.member.dto.MyChallengeInfoDto;
+import com.api.savableweb.member.dto.MyMainInfoDto;
 import com.api.savableweb.member.dto.MyPrivateRankingInfoDto;
 import com.api.savableweb.member.dto.MyRankingInfoDto;
 import lombok.extern.slf4j.Slf4j;
@@ -93,12 +94,22 @@ public class MemberJdbcRepository implements MemberRepository {
                 "group by m.kakao_id,c_id,m.username)\n" +
                 "select chall.kakao_id, c2.title,chall.username,\n" +
                 "c2.saved_money*chall.cnt as saved_money,\n" +
-                "c2.reward*chall.cnt as reward\n" +
+                "c2.reward*chall.cnt as reward,chall.cnt as cnt\n" +
                 "from chall join challenge c2 on chall.c_id::int = c2.id;";
         List<MyChallengeInfoDto> myChallengeList = template.query(sql, challengeRowMapper(),kakaoId);
         log.debug("myChallengeList={}", myChallengeList);
 ;
     return myChallengeList;
+    }
+
+    public MyMainInfoDto findMainInfoByKakaoId(String kakaoId){
+        String sql = "select username, saved_money, reward\n" +
+                "from \"member\" m \n" +
+                "where kakao_id =?;";
+        log.debug("myMainInfo = {}", kakaoId);
+        MyMainInfoDto mainInfoDto = template.queryForObject(sql, mainInfoDtoRowMapper(),kakaoId);
+
+        return mainInfoDto;
     }
 
     private RowMapper<MyRankingInfoDto> rankingRowMapper() {
@@ -127,9 +138,19 @@ public class MemberJdbcRepository implements MemberRepository {
                 MyChallengeInfoDto.builder()
                     .title(rs.getString("title"))
                     .savedMoney(rs.getInt("saved_money"))
-                    .reward((rs.getInt("reward")))
+                    .reward(rs.getInt("reward"))
                     .username(rs.getString("username"))
+                    .cnt(rs.getInt("cnt"))
                     .build()
         );
+    }
+
+    private RowMapper<MyMainInfoDto> mainInfoDtoRowMapper(){
+        return(((rs, rowNum) ->
+                MyMainInfoDto.builder()
+                        .username(rs.getString("username"))
+                        .savedMoney(rs.getInt("saved_money"))
+                        .reward(rs.getInt("reward"))
+                        .build()));
     }
 }
